@@ -1,0 +1,33 @@
+#!/bin/bash
+
+while true
+do
+archivo="/home/kali/Desktop/prueba.txt"
+while IFS= read -r linea
+do
+if [[ "$linea" == *"Host"* ]]
+then
+   echo "$linea"
+fi
+done < "$archivo"
+valor=`grep -w -c 'Host' "$archivo"`
+if [[ "$valor" != 0 ]]
+then
+   echo "El total de hosts conectados son"
+   grep -w -c 'Host' "$archivo" > totalhost.txt
+   grep -w 'Status:' "$archivo" > hosts2.txt
+   awk '{print $2}' "/home/kali/Desktop/hosts2.txt" > hosts3.txt
+   awk '{print $5}' "/home/kali/Desktop/hosts2.txt" > estado.txt
+fi
+archivo2="/home/kali/Desktop/puertos.txt"
+while IFS= read -r linea2
+do
+valor2=`grep -w -c 'tcp' "$archivo2"`
+if [[ "$valor2" != 0 ]]
+then
+   grep -w "tcp" "$archivo2" > puertosabiertos.txt
+   grep -w -c  "tcp" "$archivo2" > totalpuerto.txt
+fi
+done < "$archivo2"
+sleep 1
+done

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+while true
+do
+  archivo="/home/kali/Desktop/ipSeleccionada.txt"
+  sudo nmap -sS -iL "$archivo"
+  sudo nmap -sS -iL "$archivo" > puertos.txt
+  sleep 2
+done

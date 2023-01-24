@@ -1,0 +1,246 @@
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
+import os
+import time
+from datetime import datetime
+
+cred = credentials.Certificate('pruebtesis-b1d04-firebase-adminsdk-y2hb9-4de7106                                                                                                                                                  1a4.json')
+firebase_admin.initialize_app(cred, {'databaseURL': "https://pruebtesis-b1d04-de                                                                                                                                                  fault-rtdb.firebaseio.com"})
+
+#Permite guardar a la base de datos de firebase la ip de cada host conectado a l                                                                                                                                                  a red con la fecha en la que está conectado
+def guardarIpFecha():
+    with open('hosts3.txt') as archivo3:
+         for linea3 in archivo3:
+             now = datetime.now()
+             datos3={
+             "recursosTI":
+             {
+             "ip": linea3,
+             "horaconexion": now.strftime("%H:%M:%S"),
+             "fechaconexion": now.strftime("%d %m %Y")
+             #"fecha": now
+             }
+             }
+             resultado3=db.reference("/recursosTI/ip")
+             for key,value in datos3.items():
+                 resultado3.push().set(value)
+
+#Permite guardar a la base de datos de firebase la ip de cada host conectado a l                                                                                                                                                  a red
+def guardarFirebasehost():
+    with open('hosts3.txt') as archivo:
+         for linea in archivo:
+             #now=datetime.now()
+             datos={
+             "recursosTI":
+             {
+             "host": linea
+             #"fecha": now.strftime("%d %m %Y %H:%M:%S")
+             }
+             }
+             dato={
+             "hosts":linea
+             }
+             resultado = db.reference("/recursosTI/host")
+             for key,value in datos.items():
+                 resultado.push().set(value)
+
+def guardarFirebaseFecha():
+   # now=datetime.now()
+    datosfecha={
+    "recursosTI":
+    {
+    #"fecha":now
+    }
+    }
+    resultado4=db.reference("/recursosTI/fechahost")
+    for key,value in datosfecha.items():
+        resultado4.push().set(value)
+
+
+#Permite guardar a la base de datos de firebase el valor total de host conectado                                                                                                                                                  s a la red
+def guardarFirebasetotalhost():
+    with open('totalhost.txt') as archivo2:
+         for linea2 in archivo2:
+             datos2={
+             "recursosTI":
+             {
+             "total": linea2
+             }
+             }
+             dato={
+             "hosts":linea2
+             }
+             resultado2 = db.reference("/recursosTI/hostconectados")
+             for key,value in datos2.items():
+                 resultado2.push().set(value)
+
+#Permite guardar a la base de datos de firebase los puertos abiertos del host se                                                                                                                                                  leccionado
+def guardarpuertohost():
+    with open('puertosabiertos.txt') as archivo5:
+         for linea5 in archivo5:
+             datos5={
+             "recursosTI":
+             {
+             "puertosabiertos": linea5
+             }
+             }
+             resultado5= db.reference("/recursosTI/puertosactivos")
+             for key,value in datos5.items():
+                 resultado5.push().set(value)
+
+#Permite guardar el total de puertos del host consultado
+def guardartotalpuerto():
+    if os.stat('/home/kali/Desktop/totalpuerto.txt').st_size == 0:
+       print('Archivo vacio')
+    else:
+       with open('totalpuerto.txt') as archivo7:
+            for linea6 in archivo7:
+                datos8={
+                "recursosTI":
+                {
+                "totalpuertos": linea6
+                }
+                }
+                resultado7=db.reference("/recursosTI/totalpuertosactivos")
+                for key,value in datos8.items():
+                    resultado7.push().set(value)
+
+
+#Permite consultar a la base de datos de firebase el valor total de host conecta                                                                                                                                                  dos a la red
+def consultarTotal():
+    consulta2=db.reference("/recursosTI/")
+    consulta3=consulta2.get()
+    consultaTotal=consulta2.child("hostconectados").order_by_key().limit_to_last                                                                                                                                                  (2).get()
+    asx4=[]
+    for b in consultaTotal:
+        for c in consultaTotal[b]:
+            asx4.append(consultaTotal[b][c])
+    lista=list(map(lambda v: v.strip(), asx4))
+    sumatotal=int(lista[0]) + int(lista[1]) #Se realiza la suma del total de hos                                                                                                                                                  t conectados pasados y actuales
+    return sumatotal
+    lista.clear() #Se limpia la lista que contiene la suma de los host para que                                                                                                                                                   se guarden nuevos datos
+
+#Permite consultar a la base de datos de firebase las ip de los host conectados                                                                                                                                                   pasados y actuales para determinar el tiempo de conexión de cada uno
+def consultarDatos():
+    consulta2=db.reference("/recursosTI/")
+    consulta3=consulta2.get()
+    consultaTotal=consulta2.child("hostconectados").order_by_key().limit_to_last                                                                                                                                                  (2).get()
+    asx4=[]
+    for b in consultaTotal:
+        for c in consultaTotal[b]:
+            asx4.append(consultaTotal[b][c])
+    lista=list(map(lambda v: v.strip(), asx4))
+    primervalor=lista[0]
+    segundovalor=lista[1]
+    #sumatotal=int(lista[0]) + int(lista[1])
+    #consulta=db.reference("/recursosTI/")
+    #consulta2=consulta.get()
+    valorTotal=consultarTotal()
+    consultaHost=consulta2.child("host").order_by_key().limit_to_last(valorTotal                                                                                                                                                  ).get()
+    asx6 = []
+    for x in consultaHost:
+        for j in consultaHost[x]:
+            asx6.append(consultaHost[x][j])
+    lista2=list(map(lambda m: m.strip(), asx6))
+    return lista2
+    lista2.clear()
+
+def consultaripSeleccionada():
+    consulta2=db.reference("/recursosTI/")
+    consulta3=consulta2.get()
+    consultaTotal=consulta2.child("ipSeleccionada").order_by_key().limit_to_last                                                                                                                                                  (1).get()
+    asx4=[]
+    for b in consultaTotal:
+        asx4.append(consultaTotal[b])
+    lista=list(map(lambda v: v.strip(), asx4))
+    primervalor=lista[0]
+    return primervalor
+    lista.clear()
+
+cont=0
+cont2=0
+cont3=0
+while True:
+      if os.stat('/home/kali/Desktop/hosts3.txt').st_size == 0:
+         print('El archivo esta vacio')
+      if os.stat('/home/kali/Desktop/totalhost.txt').st_size == 0:
+         print('El archivo esta vacio')
+      if os.stat('/home/kali/Desktop/puertosabiertos.txt').st_size == 0:
+         print('El archivo esta vacio')
+      else:
+         print('El archivo no esta vacio')
+         guardarIpFecha()
+         guardarFirebasehost()
+         guardarFirebasetotalhost()
+         #consultarTotal()
+         ipseleccionada=consultaripSeleccionada()
+         file=open('ipSeleccionada.txt', 'w')
+         file.write(ipseleccionada)
+         file.close()
+         guardartotalpuerto()
+         guardarpuertohost()
+         print(ipseleccionada)
+         consulta2=db.reference("/recursosTI/")
+         consulta3=consulta2.get()
+         consultaTotal=consulta2.child("hostconectados").order_by_key().limit_to                                                                                                                                                  _last(2).get()
+         asx4=[]
+         for b in consultaTotal:
+             for c in consultaTotal[b]:
+                 asx4.append(consultaTotal[b][c])
+         lista=list(map(lambda v: v.strip(), asx4))
+         primervalor=lista[0]
+         segundovalor=lista[1]
+         lista3= consultarDatos()
+         asx = []
+         with open('hosts3.txt') as archivo:
+              for linea in archivo:
+                  asx.append(linea)
+                  asx.clear()
+         valoresanteriores=lista3[:int(primervalor)]
+         valoresactuales=lista3[int(primervalor):]
+         print(valoresanteriores)
+         print(valoresactuales)
+         asx9=[]
+         for f in valoresactuales:
+             if f not in valoresanteriores:
+                print("Se conecto justo ahora", f)
+                print(datetime.now())
+             elif f in valoresanteriores:
+                print("Sigue conectado", f)
+                asx9.append(f)
+                print(datetime.now().strftime("%H:%M"))
+         for n in valoresanteriores:
+             if n not in valoresactuales:
+                print("Se desconecto",n)
+                #consulta2=db.reference("/recursosTI/")
+                #consulta=consulta2.child("ip").order_by_child("ip").equal_to("1                                                                                                                                                  92.168.100.69").limit_to_last(1).get()
+                #asx7=[]
+                #for k in consulta:
+                    #for l in consulta[k]:
+                        #asx7.append(consulta[k][l])
+                #lista5=list(map(lambda v: v.strip(), asx7))
+                #print(lista5)
+                #fechaActual=datetime.now()
+                #print(fechaActual)
+                #longitudlista=len(asx9)
+                #cont3=(cont2/longitudlista)*8
+                #cont2=cont
+                #print(cont3)
+             #else:
+                #cont2+=1
+                #print("Sigue conectado", n)
+                #print(cont2)
+                #asx9.append(n)
+                #print(datetime.now().strftime("%H:%M"))
+                #print(datetime.now())
+         asx9.clear()
+         #for f in valoresactuales:
+          #   if f not in valoresanteriores:
+           #     print("Se conecto justo ahora", f)
+            #    print(datetime.now())
+         #lista3.clear()
+         #consultarDatos()
+      #cont+=1
+      #print(cont)
+      time.sleep(8)

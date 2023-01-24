@@ -1,0 +1,6 @@
+#!/bin/bash
+while true
+do
+   nmap -sn 192.168.100.0/24 -oG prueba.txt
+   sleep 1
+done
